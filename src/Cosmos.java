@@ -62,8 +62,30 @@ public class Cosmos extends JPanel {
 
     int x = 10;
     int y = 10;
+    int pkt = 0;
 
     ArrayList<Meteoryt> meteoryts = new ArrayList<>();
+
+    public boolean crash(int mouseX, int mouseY) {
+        Meteoryt[] meteorytsTab = new Meteoryt[meteoryts.size()];
+        meteoryts.toArray(meteorytsTab);
+
+        for (Meteoryt meteoryt : meteorytsTab) {
+
+            if (!meteoryt.isVisible())
+                meteoryts.remove(meteoryt);
+            if (meteoryt.x <= mouseX && meteoryt.y <= mouseY && meteoryt.x + meteoryt.size >= mouseX && meteoryt.y + meteoryt.size >= mouseY)
+                return true;
+        }
+        return false;
+    }
+
+    public void lose() {
+        JOptionPane.showMessageDialog(null, String.format("Zdobyłeś: %d punkty", ((int) pkt)));
+        pkt = 0;
+        meteoryts.clear();
+        repaint();
+    }
 
 
     public Cosmos() {
@@ -77,30 +99,36 @@ public class Cosmos extends JPanel {
             @Override
             public void mouseMoved(MouseEvent e) {
 
+                if (crash(e.getX(), e.getY()))
+                    lose();
+
                 while (x != e.getX() || y != e.getY()) {
                     x += e.getX() - x;
                     y += e.getY() - y;
 
                     repaint();
+
+                    try {
+                        pkt += 1;
+                        Thread.sleep(10);
+                    } catch (InterruptedException ex) {
+                        ex.printStackTrace();
+                    }
                 }
             }
         });
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while(true){
-                    try{
-                        Thread.sleep(250);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    meteoryts.add(new Meteoryt());
+        new Thread(() -> {
+            while (true) {
+                try {
+                    Thread.sleep(250);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
+                meteoryts.add(new Meteoryt());
             }
         }).start();
     }
-
 
 
     @Override
@@ -115,11 +143,15 @@ public class Cosmos extends JPanel {
             e.printStackTrace();
         }
 
+        g.setColor(Color.GREEN);
+        g.setFont(new Font("Arial", Font.BOLD, 20));
+        g.drawString(((int) pkt) + " ", 50, 50);
+
         Meteoryt[] meteorytsTab = new Meteoryt[meteoryts.size()];
         meteoryts.toArray(meteorytsTab);
 
-        for(Meteoryt meteor: meteorytsTab){
-            try{
+        for (Meteoryt meteor : meteorytsTab) {
+            try {
                 meteor.motion();
                 g.drawImage(resize(ImageIO.read(new File("meteor.png")), meteor.size, meteor.size), meteor.x, meteor.y, null);
             } catch (IOException e) {
@@ -129,7 +161,7 @@ public class Cosmos extends JPanel {
     }
 
 
-    public static BufferedImage resize(BufferedImage img, int height, int width){
+    public static BufferedImage resize(BufferedImage img, int height, int width) {
         Image tmp = img.getScaledInstance(width, height, BufferedImage.SCALE_SMOOTH);
         BufferedImage scalling = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         Graphics2D graphics2D = scalling.createGraphics();
