@@ -136,8 +136,8 @@ public class Cosmos extends JPanel {
         super.paintComponent(g);
 
         try {
-            g.drawImage(ImageIO.read(new File("tlo.png")), 0, 0, null);
-            g.drawImage(ImageIO.read(new File("ufo.png")), x - 20, y - 20, null);
+            g.drawImage(ImageIO.read(new File("src/images/tlo.png")), 0, 0, null);
+            g.drawImage(ImageIO.read(new File("src/images/ufo.png")), x - 20, y - 20, null);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -153,7 +153,7 @@ public class Cosmos extends JPanel {
         for (Meteoryt meteor : meteorytsTab) {
             try {
                 meteor.motion();
-                g.drawImage(resize(ImageIO.read(new File("meteor.png")), meteor.size, meteor.size), meteor.x, meteor.y, null);
+                g.drawImage(resize(ImageIO.read(new File("src/images/meteor.png")), meteor.size, meteor.size), meteor.x, meteor.y, null);
             } catch (IOException e) {
                 e.printStackTrace();
             }
